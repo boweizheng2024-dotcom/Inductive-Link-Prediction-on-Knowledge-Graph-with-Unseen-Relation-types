@@ -4,22 +4,20 @@
 
 Given a query consisting of a source entity $h$ and a relation $q$, the model ranks candidate tail entities $t$ for the missing fact $(h,q,?)$. This link-prediction task can be used to complete knowledge graphs by suggesting likely missing facts.
 
-ULTRA (Universal Learning for Relation-graph-based representations) is designed to generalize to new knowledge graphs, including graphs with unseen entities and different relation vocabularies. It learns structural patterns among relation types rather than relying only on relation names. The model has two stages: a relation encoder computes query-conditioned relation representations on a relation graph, and an entity encoder uses those representations to propagate information through the knowledge graph and score candidate entities.
+ULTRA is designed to generalize to new knowledge graphs, including graphs with unseen entities and different relation vocabularies. It learns structural patterns among relation types rather than relying only on relation names. 
+
+The model has two stages: a relation encoder computes query-conditioned relation representations on a relation graph, and an entity encoder uses those representations to propagate information through the knowledge graph and score candidate entities.
 
 ## 2. Relation Graph Construction
 
 A knowledge graph is $G=(V,E,R)$, where $V$ is the set of entities, $R$ is the set of relation types, and
-$$
-E\subseteq V\times R\times V
-$$
+$E\subseteq V\times R\times V$
 is the set of directed facts. A fact $(u,r,v)$ means that relation $r$ connects head entity $u$ to tail entity $v$.
 
 ULTRA constructs a relation graph $L(G)=(V_L,E_L,R_L)$, where each original relation becomes a node:
-$$
-V_L=R,\qquad
+$V_L=R,\qquad
 R_L=\{\mathrm{t2h},\mathrm{h2h},\mathrm{h2t},\mathrm{t2t}\},\qquad
-E_L\subseteq R\times R_L\times R.
-$$
+E_L\subseteq R\times R_L\times R.$
 
 An edge $(r_1,\tau,r_2)\in E_L$ exists when two facts in the original KG share an entity in the endpoint configuration specified by $\tau$:
 $$
