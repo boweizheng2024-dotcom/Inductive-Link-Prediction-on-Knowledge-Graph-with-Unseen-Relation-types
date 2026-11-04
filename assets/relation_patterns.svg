@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="420" viewBox="0 0 900 420">
+<rect width="900" height="420" fill="white"/>
+<style>.lbl{font:italic 22px Georgia,serif;fill:#222}.typ{font:italic 24px Georgia,serif;fill:#222}.edge{stroke:#222;stroke-width:2.4;fill:none}.node{fill:#111}</style>
+<defs><marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#222"/></marker></defs>
+<!-- row labels -->
+<text class="typ" x="35" y="60">t2h</text><text class="typ" x="35" y="155">h2h</text><text class="typ" x="35" y="250">h2t</text><text class="typ" x="35" y="345">t2t</text>
+<!-- nodes each row x=300,520,740 -->
+<!-- t2h: u-r1->v-r2->w -->
+<path class="edge" marker-end="url(#arr)" d="M315 55 H505"/><path class="edge" marker-end="url(#arr)" d="M535 55 H725"/>
+<circle class="node" cx="300" cy="55" r="6"/><circle class="node" cx="520" cy="55" r="6"/><circle class="node" cx="740" cy="55" r="6"/>
+<text class="lbl" x="389" y="42">r₁</text><text class="lbl" x="609" y="42">r₂</text><text class="lbl" x="294" y="84">u</text><text class="lbl" x="514" y="84">v</text><text class="lbl" x="734" y="84">w</text>
+<!-- h2h: (v,r1,u), (v,r2,w) -->
+<path class="edge" marker-end="url(#arr)" d="M505 150 H315"/><path class="edge" marker-end="url(#arr)" d="M535 150 H725"/>
+<circle class="node" cx="300" cy="150" r="6"/><circle class="node" cx="520" cy="150" r="6"/><circle class="node" cx="740" cy="150" r="6"/>
+<text class="lbl" x="389" y="137">r₁</text><text class="lbl" x="609" y="137">r₂</text><text class="lbl" x="294" y="179">u</text><text class="lbl" x="514" y="179">v</text><text class="lbl" x="734" y="179">w</text>
+<!-- h2t: (v,r1,u), (w,r2,v) -->
+<path class="edge" marker-end="url(#arr)" d="M505 245 H315"/><path class="edge" marker-end="url(#arr)" d="M725 245 H535"/>
+<circle class="node" cx="300" cy="245" r="6"/><circle class="node" cx="520" cy="245" r="6"/><circle class="node" cx="740" cy="245" r="6"/>
+<text class="lbl" x="389" y="232">r₁</text><text class="lbl" x="609" y="232">r₂</text><text class="lbl" x="294" y="274">u</text><text class="lbl" x="514" y="274">v</text><text class="lbl" x="734" y="274">w</text>
+<!-- t2t: (u,r1,v), (w,r2,v) -->
+<path class="edge" marker-end="url(#arr)" d="M315 340 H505"/><path class="edge" marker-end="url(#arr)" d="M725 340 H535"/>
+<circle class="node" cx="300" cy="340" r="6"/><circle class="node" cx="520" cy="340" r="6"/><circle class="node" cx="740" cy="340" r="6"/>
+<text class="lbl" x="389" y="327">r₁</text><text class="lbl" x="609" y="327">r₂</text><text class="lbl" x="294" y="369">u</text><text class="lbl" x="514" y="369">v</text><text class="lbl" x="734" y="369">w</text>
+</svg>
