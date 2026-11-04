@@ -13,21 +13,21 @@ The model has two stages: a relation encoder computes query-conditioned relation
 A knowledge graph is `G=(V,E,R)`, where `V` is the set of entities, `R` is the set of relation types, and `E\subseteq V\times R\times V` is the set of directed facts. A fact `(u,r,v)` means that relation `r` connects head entity `u` to tail entity `v`.
 
 ULTRA constructs a relation graph `L(G)=(V_L,E_L,R_L)`, where each original relation becomes a node:
-$$
+`math
 V_L=R,\qquad
 R_L=\{\mathrm{t2h},\mathrm{h2h},\mathrm{h2t},\mathrm{t2t}\},\qquad
 E_L\subseteq R\times R_L\times R.
-$$
+`
 
 An edge `(r_1,\tau,r_2)\in E_L` exists when two facts in the original KG share an entity in the endpoint configuration specified by `\tau`:
-$$
+`math
 \begin{aligned}
 \mathrm{t2h}:&\quad (u,r_1,v)\in E,\quad (v,r_2,w)\in E,\\
 \mathrm{h2h}:&\quad (v,r_1,u)\in E,\quad (v,r_2,w)\in E,\\
 \mathrm{h2t}:&\quad (v,r_1,u)\in E,\quad (w,r_2,v)\in E,\\
 \mathrm{t2t}:&\quad (u,r_1,v)\in E,\quad (w,r_2,v)\in E.
 \end{aligned}
-$$
+`
 
 The four endpoint patterns are illustrated below. The nodes are entities `u,v,w`, and the directed edges are labeled by relations `r_1` and `r_2`.
 
@@ -42,25 +42,25 @@ ULTRA uses two message-passing stages: a **relation encoder** updates relation r
 ### 3.1 Learn Relation Representations
 
 For a query relation `q`, the initial representation of relation node `r` is
-$$
+`math
 \mathbf{h}_{r\mid q}^{(0)}
 =
 \begin{cases}
 \mathbf{1}_d & r=q,\\
 \mathbf{0}_d & r\ne q.
 \end{cases}
-$$
+`
 
 Each relation-graph edge type `\tau\in R_L` has a learnable embedding `\mathbf{z}_\tau\in\mathbb{R}^d`. The message along an edge of type `\tau` is
-$$
+`math
 \mathrm{msg}_{\tau}(\mathbf{h}_{r'\mid q}^{(t)})
 =
 \mathbf{h}_{r'\mid q}^{(t)}\odot\mathbf{z}_{\tau},
-$$
+`
 where `\odot` denotes element-wise multiplication.
 
 The relation update first computes a message-passing candidate:
-$$
+`math
 \widetilde{\mathbf{h}}_{r\mid q}^{(t+1)}
 =
 \mathrm{ReLU}\left(
@@ -75,9 +75,9 @@ W_1^{(t)}
 +\mathbf{b}_1^{(t)}
 \right)
 \right).
-$$
+`
 The layer output includes a residual connection when input and output dimensions match:
-$$
+`math
 \mathbf{h}_{r\mid q}^{(t+1)}
 =
 \begin{cases}
@@ -85,23 +85,23 @@ $$
 \dim(\mathbf{h}_{r\mid q}^{(t+1)})=\dim(\mathbf{h}_{r\mid q}^{(t)}),\\
 \widetilde{\mathbf{h}}_{r\mid q}^{(t+1)},&\text{otherwise}.
 \end{cases}
-$$
+`
 
 Here `\parallel` denotes concatenation, and `N_{R_L}(r)` is the typed neighborhood of relation node `r`. The message function is element-wise multiplication by the edge-type embedding. The update function applies a linear transformation, LayerNorm, and ReLU. As in the notebook implementation, the residual is added after the convolution output when consecutive hidden states have the same shape.
 
 ### 3.2 Learn Entity Representations
 
 For a query `(h,q,?)`, the source entity `h` is initialized with the query-conditioned representation of relation `q`; other entities receive zero boundary features. An edge with relation `r` sends a message from entity `w` to entity `v`:
-$$
+`math
 \mathbf{m}_{w\to v}
 =
 \mathbf{h}_{w\mid h,q}^{(\ell)}
 \odot
 \mathrm{MLP}\!\left(\mathbf{h}_{r\mid q}^{(T)}\right).
-$$
+`
 
 The entity update candidate is
-$$
+`math
 \widetilde{\mathbf{h}}_{v\mid h,q}^{(\ell+1)}
 =
 \mathrm{ReLU}\left(
@@ -118,9 +118,9 @@ W^{(\ell)}
 +\mathbf{b}^{(\ell)}
 \right)
 \right).
-$$
+`
 The entity layer also adds a residual connection when input and output dimensions match:
-$$
+`math
 \mathbf{h}_{v\mid h,q}^{(\ell+1)}
 =
 \begin{cases}
@@ -128,12 +128,12 @@ $$
 \dim(\mathbf{h}_{v\mid h,q}^{(\ell+1)})=\dim(\mathbf{h}_{v\mid h,q}^{(\ell)}),\\
 \widetilde{\mathbf{h}}_{v\mid h,q}^{(\ell+1)},&\text{otherwise}.
 \end{cases}
-$$
+`
 
 The entity message function combines the neighbor representation with a learned projection of the query-conditioned relation representation by element-wise multiplication. As in the relation encoder, the update uses a linear transformation, LayerNorm, and ReLU.
 
 To score a candidate tail `t`, the model concatenates its final entity representation with the query representation and passes the result through a two-layer scoring MLP:
-$$
+`math
 s(h,q,t)
 =
 \mathrm{MLP}_{\mathrm{score}}
@@ -142,7 +142,7 @@ s(h,q,t)
 \parallel
 \mathbf{h}_{q\mid q}^{(0)}
 \right).
-$$
+`
 Higher scores indicate more likely candidate tails.
 
 ## 4. Evaluation Datasets
@@ -161,7 +161,7 @@ For each test triple `(h,r,t)`, the evaluator ranks candidates for both tail pre
 Some queries have multiple correct answers. In filtered evaluation, other known correct answers are removed from the candidate set so they are not counted as negatives. The current target `t` remains in the set.
 
 Let `T^{-}` denote the candidate entities remaining after filtering, and let `s(x)` be the model score for candidate `x`. The rank of the correct target is
-$$
+`math
 \boxed{
 \mathrm{rank}(t)
 =
@@ -169,7 +169,7 @@ $$
 \sum_{x\in T^{-}}
 \mathbb{I}\big[s(x)\ge s(t)\big]
 }
-$$
+`
 where `\mathbb{I}[\cdot]` equals 1 when the condition is true and 0 otherwise. Thus, the target's rank is one plus the number of remaining candidates scored at least as highly.
 
 For NELL, the test filtering graph combines the inference graph with validation and test target edges. For WKIngram, the validation and test filtering graph includes the inference edges and both validation and test target edges.
@@ -177,7 +177,7 @@ For NELL, the test filtering graph combines the inference graph with validation 
 ## 6. Metrics and Results
 
 The evaluator combines filtered ranks for head and tail prediction. Given `N` evaluation ranks `rank_i`, it reports:
-$$
+`math
 \mathrm{MR}
 =
 \frac{1}{N}\sum_{i=1}^{N}rank_i,
@@ -185,13 +185,13 @@ $$
 \mathrm{MRR}
 =
 \frac{1}{N}\sum_{i=1}^{N}\frac{1}{rank_i},
-$$
-$$
+`
+`math
 \mathrm{Hits@}k
 =
 \frac{\#\{i:rank_i\le k\}}{N},
 \qquad k\in\{1,3,10\}.
-$$
+`
 Lower MR is better; higher MRR and Hits@k are better.
 
 The table reports the actual notebook outputs:
