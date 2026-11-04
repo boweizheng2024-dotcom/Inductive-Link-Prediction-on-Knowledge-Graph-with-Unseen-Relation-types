@@ -2,7 +2,7 @@
 
 ## 1. Background and Model Overview
 
-Given a query consisting of a source entity `h` and a relation `q`, the model ranks candidate tail entities `t` for the missing fact `(h,q,?)`. This link-prediction task can be used to complete knowledge graphs by suggesting likely missing facts.
+Given a query consisting of a source entity h and a relation q, the model ranks candidate tail entities t for the missing fact (h,q,?). This link-prediction task can be used to complete knowledge graphs by suggesting likely missing facts.
 
 ULTRA is designed to generalize to new knowledge graphs, including graphs with unseen entities and different relation vocabularies. It learns structural patterns among relation types rather than relying only on relation names.
 
@@ -10,16 +10,16 @@ The model has two stages: a relation encoder computes query-conditioned relation
 
 ## 2. Relation Graph Construction
 
-A knowledge graph is `G=(V,E,R)`, where `V` is the set of entities, `R` is the set of relation types, and `E\subseteq V\times R\times V` is the set of directed facts. A fact `(u,r,v)` means that relation `r` connects head entity `u` to tail entity `v`.
+A knowledge graph is G=(V,E,R), where V is the set of entities, R is the set of relation types, and E\subseteq V\times R\times V is the set of directed facts. A fact (u,r,v) means that relation r connects head entity u to tail entity v.
 
-ULTRA constructs a relation graph `L(G)=(V_L,E_L,R_L)`, where each original relation becomes a node:
+ULTRA constructs a relation graph L(G)=(V_L,E_L,R_L), where each original relation becomes a node:
 $$
 V_L=R,\qquad
 R_L=\{\text{t2h},\text{h2h},\text{h2t},\text{t2t}\},\qquad
 E_L\subseteq R\times R_L\times R.
 $$
 
-An edge `(r_1,\tau,r_2)\in E_L` exists when two facts in the original KG share an entity in the endpoint configuration specified by `\tau`:
+An edge (r_1,\tau,r_2)\in E_L exists when two facts in the original KG share an entity in the endpoint configuration specified by \tau:
 $$
 \begin{aligned}
 \text{t2h}:&\quad (u,r_1,v)\in E,\quad (v,r_2,w)\in E,\\
@@ -29,7 +29,7 @@ $$
 \end{aligned}
 $$
 
-The four endpoint patterns are illustrated below. The nodes are entities `u,v,w`, and the directed edges are labeled by relations `r_1` and `r_2`.
+The four endpoint patterns are illustrated below. The nodes are entities u,v,w, and the directed edges are labeled by relations r_1 and r_2.
 
 ![Four relation-graph endpoint patterns: t2h, h2h, h2t, and t2t](assets/relation_patterns.svg)
 
@@ -41,7 +41,7 @@ ULTRA uses two message-passing stages: a **relation encoder** updates relation r
 
 ### 3.1 Learn Relation Representations
 
-For a query relation `q`, the initial representation of relation node `r` is
+For a query relation q, the initial representation of relation node r is
 $$
 \mathbf{h}_{r\mid q}^{(0)}
 =
@@ -51,13 +51,13 @@ $$
 \end{cases}
 $$
 
-Each relation-graph edge type `\tau\in R_L` has a learnable embedding `\mathbf{z}_\tau\in\mathbb{R}^d`. The message along an edge of type `\tau` is
+Each relation-graph edge type \tau\in R_L has a learnable embedding \mathbf{z}_\tau\in\mathbb{R}^d. The message along an edge of type \tau is
 $$
 \text{msg}_{\tau}(\mathbf{h}_{r'\mid q}^{(t)})
 =
 \mathbf{h}_{r'\mid q}^{(t)}\odot\mathbf{z}_{\tau},
 $$
-where `\odot` denotes element-wise multiplication.
+where \odot denotes element-wise multiplication.
 
 The relation update first computes a message-passing candidate:
 $$
@@ -87,11 +87,11 @@ $$
 \end{cases}
 $$
 
-Here `\parallel` denotes concatenation, and `N_{R_L}(r)` is the typed neighborhood of relation node `r`. The message function is element-wise multiplication by the edge-type embedding. The update function applies a linear transformation, LayerNorm, and ReLU. As in the notebook implementation, the residual is added after the convolution output when consecutive hidden states have the same shape.
+Here \parallel denotes concatenation, and N_{R_L}(r) is the typed neighborhood of relation node r. The message function is element-wise multiplication by the edge-type embedding. The update function applies a linear transformation, LayerNorm, and ReLU. As in the notebook implementation, the residual is added after the convolution output when consecutive hidden states have the same shape.
 
 ### 3.2 Learn Entity Representations
 
-For a query `(h,q,?)`, the source entity `h` is initialized with the query-conditioned representation of relation `q`; other entities receive zero boundary features. An edge with relation `r` sends a message from entity `w` to entity `v`:
+For a query (h,q,?), the source entity h is initialized with the query-conditioned representation of relation q; other entities receive zero boundary features. An edge with relation r sends a message from entity w to entity v:
 $$
 \mathbf{m}_{w\to v}
 =
@@ -132,7 +132,7 @@ $$
 
 The entity message function combines the neighbor representation with a learned projection of the query-conditioned relation representation by element-wise multiplication. As in the relation encoder, the update uses a linear transformation, LayerNorm, and ReLU.
 
-To score a candidate tail `t`, the model concatenates its final entity representation with the query representation and passes the result through a two-layer scoring MLP:
+To score a candidate tail t, the model concatenates its final entity representation with the query representation and passes the result through a two-layer scoring MLP:
 $$
 s(h,q,t)
 =
@@ -149,18 +149,18 @@ Higher scores indicate more likely candidate tails.
 
 The notebook evaluates ULTRA on eight inductive datasets:
 
-- **NELLInductive:** versions `v1`, `v2`, `v3`, and `v4`, based on NELL.
-- **WKIngram:** variants `25`, `50`, `75`, and `100`, based on WikiData and prepared in the InGram format.
+- **NELLInductive:** versions v1, v2, v3, and v4, based on NELL.
+- **WKIngram:** variants 25, 50, 75, and 100, based on WikiData and prepared in the InGram format.
 
-The notebook loads a pretrained checkpoint, `3g_reproduced.pth`, for evaluation. It states that the checkpoint was pretrained on FB15k237, WN18RR, and CodExMedium, and that NELL and WikiData were unseen during pretraining.
+The notebook loads a pretrained checkpoint, 3g_reproduced.pth, for evaluation. It states that the checkpoint was pretrained on FB15k237, WN18RR, and CodExMedium, and that NELL and WikiData were unseen during pretraining.
 
 ## 5. Filtered Ranking Evaluation
 
-For each test triple `(h,r,t)`, the evaluator ranks candidates for both tail prediction `(h,r,?)` and head prediction `(?,r,t)`. Head prediction is converted into an equivalent tail-prediction query using the inverse relation.
+For each test triple (h,r,t), the evaluator ranks candidates for both tail prediction (h,r,?) and head prediction (?,r,t). Head prediction is converted into an equivalent tail-prediction query using the inverse relation.
 
-Some queries have multiple correct answers. In filtered evaluation, other known correct answers are removed from the candidate set so they are not counted as negatives. The current target `t` remains in the set.
+Some queries have multiple correct answers. In filtered evaluation, other known correct answers are removed from the candidate set so they are not counted as negatives. The current target t remains in the set.
 
-Let `T^{-}` denote the candidate entities remaining after filtering, and let `s(x)` be the model score for candidate `x`. The rank of the correct target is
+Let T^{-} denote the candidate entities remaining after filtering, and let s(x) be the model score for candidate x. The rank of the correct target is
 $$
 \boxed{
 \text{rank}(t)
@@ -170,13 +170,13 @@ $$
 \mathbb{I}\big[s(x)\ge s(t)\big]
 }
 $$
-where `\mathbb{I}[\cdot]` equals 1 when the condition is true and 0 otherwise. Thus, the target's rank is one plus the number of remaining candidates scored at least as highly.
+where \mathbb{I}[\cdot] equals 1 when the condition is true and 0 otherwise. Thus, the target's rank is one plus the number of remaining candidates scored at least as highly.
 
 For NELL, the test filtering graph combines the inference graph with validation and test target edges. For WKIngram, the validation and test filtering graph includes the inference edges and both validation and test target edges.
 
 ## 6. Metrics and Results
 
-The evaluator combines filtered ranks for head and tail prediction. Given `N` evaluation ranks `rank_i`, it reports:
+The evaluator combines filtered ranks for head and tail prediction. Given N evaluation ranks rank_i, it reports:
 $$
 \mathrm{MR}
 =
@@ -209,7 +209,7 @@ The table reports the actual notebook outputs:
 
 ## 7. Reproducibility Notes
 
-- The evaluation code sets the PyTorch random seed to `1024`.
+- The evaluation code sets the PyTorch random seed to 1024.
 - Both encoders are configured with seven hidden dimensions of size 64.
 - The evaluator uses batches of 16 test triples.
 - Device selection uses CUDA when available and otherwise CPU.
