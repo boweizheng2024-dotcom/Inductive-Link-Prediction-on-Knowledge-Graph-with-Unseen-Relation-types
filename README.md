@@ -10,16 +10,18 @@ The model has two stages: a relation encoder computes query-conditioned relation
 
 ## 2. Relation Graph Construction
 
-A knowledge graph is G=(V,E,R), where V is the set of entities, R is the set of relation types, and E\subseteq V\times R\times V is the set of directed facts. A fact (u,r,v) means that relation r connects head entity u to tail entity v.
+A knowledge graph is $G=(V,E,R)$, where $V$ is the set of entities, $R$ is the set of relation types, and $E\subseteq V\times R\times V$ is the set of directed facts. A fact $(u,r,v)$ means that relation $r$ connects head entity $u$ to tail entity $v$.
 
-ULTRA constructs a relation graph L(G)=(V_L,E_L,R_L), where each original relation becomes a node:
+ULTRA constructs a relation graph $L(G)=(V_L,E_L,R_L)$, where each original relation becomes a node:
+
 $$
 V_L=R,\qquad
 R_L=\{\text{t2h},\text{h2h},\text{h2t},\text{t2t}\},\qquad
 E_L\subseteq R\times R_L\times R.
 $$
 
-An edge (r_1,\tau,r_2)\in E_L exists when two facts in the original KG share an entity in the endpoint configuration specified by \tau:
+An edge $(r_1,\tau,r_2)\in E_L$ exists when two facts in the original KG share an entity in the endpoint configuration specified by $\tau$:
+
 $$
 \begin{aligned}
 \text{t2h}:&\quad (u,r_1,v)\in E,\quad (v,r_2,w)\in E,\\
