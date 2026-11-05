@@ -31,7 +31,7 @@ $$
 \end{aligned}
 $$
 
-The four endpoint patterns are illustrated below. The nodes are entities u,v,w, and the directed edges are labeled by relations r_1 and r_2.
+The four endpoint patterns are illustrated below. The nodes are entities $u,v,w$, and the directed edges are labeled by relations $r_1$ and $r_2$.
 
 ![Four relation-graph endpoint patterns: t2h, h2h, h2t, and t2t](assets/relation_patterns.svg)
 
@@ -43,7 +43,8 @@ ULTRA uses two message-passing stages: a **relation encoder** updates relation r
 
 ### 3.1 Learn Relation Representations
 
-For a query relation q, the initial representation of relation node r is
+For a query relation $q$, the initial representation of relation node $r$ is
+
 $$
 \mathbf{h}_{r\mid q}^{(0)}
 =
@@ -53,15 +54,18 @@ $$
 \end{cases}
 $$
 
-Each relation-graph edge type \tau\in R_L has a learnable embedding \mathbf{z}_\tau\in\mathbb{R}^d. The message along an edge of type \tau is
+Each relation-graph edge type \tau\in R_L has a learnable embedding \mathbf{z}_\tau\in\mathbb{R}^d. The message along an edge of type $\tau$ is
+
 $$
 \text{msg}_{\tau}(\mathbf{h}_{r'\mid q}^{(t)})
 =
 \mathbf{h}_{r'\mid q}^{(t)}\odot\mathbf{z}_{\tau},
 $$
+
 where \odot denotes element-wise multiplication.
 
 The relation update first computes a message-passing candidate:
+
 $$
 \widetilde{\mathbf{h}}_{r\mid q}^{(t+1)}
 =
@@ -78,7 +82,9 @@ W_1^{(t)}
 \right)
 \right).
 $$
+
 The layer output includes a residual connection when input and output dimensions match:
+
 $$
 \mathbf{h}_{r\mid q}^{(t+1)}
 =
