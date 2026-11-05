@@ -90,8 +90,8 @@ The layer then combines the **current** relation-node representation with the ag
 
 $$
 \widetilde{\mathbf h}_{r\mid q}^{(\ell+1)}
-=\operatorname{ReLU}\!\left(
-\operatorname{LN}\!\left(
+=ReLU\!\left(
+LN\!\left(
 W_R^{(\ell)}
 \left[\mathbf h_{r\mid q}^{(\ell)}\parallel\mathbf a_r^{(\ell)}\right]
 +\mathbf b_R^{(\ell)}
@@ -104,7 +104,7 @@ $$
 \widetilde{\mathbf h}_{r\mid q}^{(\ell+1)}.
 $$
 
-Here, $\parallel$ denotes concatenation and $\operatorname{LN}$ denotes LayerNorm. The residual addition is applied when the input and output hidden-state shapes match. In particular, the concatenated node representation is $\mathbf h_{r\mid q}^{(\ell)}$, **not** the initial state $\mathbf h_{r\mid q}^{(0)}$; the initial state instead appears in the aggregated term as a boundary feature.
+Here, $\parallel$ denotes concatenation and $LN$ denotes LayerNorm. The residual addition is applied when the input and output hidden-state shapes match. In particular, the concatenated node representation is $\mathbf h_{r\mid q}^{(\ell)}$, **not** the initial state $\mathbf h_{r\mid q}^{(0)}$; the initial state instead appears in the aggregated term as a boundary feature.
 
 After $T$ relation message-passing layers, the encoder produces query-conditioned representations $\{\mathbf h_{r\mid q}^{(T)}:r\in R\}$ for all relation types. These representations are computed for the current query relation rather than retrieved from a fixed, graph-specific relation embedding table.
 
@@ -125,7 +125,7 @@ For an entity-graph edge $(w,r,v)\in E$, the message from entity $w$ to entity $
 $$
 \mathbf m_{w\to v}^{(\ell)}
 =\mathbf h_{w\mid h,q}^{(\ell)}
-\odot\operatorname{MLP}^{(\ell)}\!\left(
+\odot MLP^{(\ell)}\!\left(
 \mathbf h_{r\mid q}^{(T)}\right).
 $$
 
@@ -136,7 +136,7 @@ $$
 =\mathbf h_{v\mid h,q}^{(0)}+
 \sum_{(w,r,v)\in E}
 \mathbf h_{w\mid h,q}^{(\ell)}
-\odot\operatorname{MLP}^{(\ell)}\!\left(
+\odot MLP^{(\ell)}\!\left(
 \mathbf h_{r\mid q}^{(T)}\right).
 $$
 
@@ -144,8 +144,8 @@ The entity-node update is
 
 $$
 \widetilde{\mathbf h}_{v\mid h,q}^{(\ell+1)}
-=\operatorname{ReLU}\!\left(
-\operatorname{LN}\!\left(
+=ReLU \!\left(
+LN \!\left(
 W_E^{(\ell)}
 \left[\mathbf h_{v\mid h,q}^{(\ell)}\parallel\mathbf a_v^{(\ell)}\right]
 +\mathbf b_E^{(\ell)}
@@ -164,7 +164,7 @@ After $L$ entity message-passing layers, a candidate tail $t$ is scored using it
 
 $$
 s(h,q,t)
-=\operatorname{MLP}_{\mathrm{score}}\!\left(
+=MLP_{\mathrm{score}}\!\left(
 \mathbf h_{t\mid h,q}^{(L)}\parallel
 \mathbf h_{q\mid q}^{(T)}
 \right).
@@ -203,7 +203,7 @@ For the correct target $t$, the filtered rank is
 
 $$
 \boxed{
-\operatorname{rank}(t)
+rank(t)
 =1+\sum_{x\in T^-(h,r)}
 \mathbb I\!\left[s(h,r,x)\ge s(h,r,t)\right]
 }
@@ -218,15 +218,15 @@ The filtering graph is used to construct evaluation masks and is distinct from t
 Each test triple contributes a head-prediction rank and a tail-prediction rank. If there are $M$ evaluated test triples and both directions are included, the evaluator obtains $N=2M$ ranks. The reported metrics are calculated over these filtered ranks:
 
 $$
-\mathrm{MR}=\frac{1}{N}\sum_{i=1}^{N}\operatorname{rank}_i,
+\mathrm{MR}=\frac{1}{N}\sum_{i=1}^{N}rank_i,
 \qquad
-\mathrm{MRR}=\frac{1}{N}\sum_{i=1}^{N}\frac{1}{\operatorname{rank}_i},
+\mathrm{MRR}=\frac{1}{N}\sum_{i=1}^{N}\frac{1}{rank_i},
 $$
 
 $$
 \mathrm{Hits@}k
 =\frac{1}{N}\sum_{i=1}^{N}
-\mathbb I\!\left[\operatorname{rank}_i\le k\right],
+\mathbb I\!\left[rank_i\le k\right],
 \qquad k\in\{1,3,10\}.
 $$
 
