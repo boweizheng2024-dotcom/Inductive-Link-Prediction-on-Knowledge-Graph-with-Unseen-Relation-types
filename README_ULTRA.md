@@ -19,17 +19,17 @@ R_{\mathrm{aug}}=R_{\mathrm{direct}}\cup R_{\mathrm{inverse}},
 \qquad |R_{\mathrm{aug}}|=2R_0.
 $$
 
-In the following, $E$ and $R$ refer to the **augmented** triple set and relation set, respectively. The same augmented relation graph supports both head and tail prediction; separate relation graphs are not constructed for the two prediction directions.
+In the following, $E$ and $R$ refer to the **augmented** triple set and relation set, respectively. The same augmented relation graph supports both head and tail prediction.
 
 ULTRA constructs a relation graph $L(G)=(V_L,E_L,R_L)$ in which each relation type (including each inverse relation) becomes a node:
 
 $$
 V_L=R,\qquad
-R_L=\{\mathrm{t2h},\mathrm{h2h},\mathrm{h2t},\mathrm{t2t}\},
+R_L=\lbrace \mathrm{t2h},\mathrm{h2h},\mathrm{h2t},\mathrm{t2t} \rbrace,
 \qquad E_L\subseteq R\times R_L\times R.
 $$
 
-Thus, $|V_L|=2R_0$, while $|R_L|=4$. The four types in $R_L$ describe **structural connections between relation nodes**, not the original KG's relation labels. A relation-graph edge $(r_1,\tau,r_2)$ exists when triples involving $r_1$ and $r_2$ share an entity in the endpoint configuration specified by $\tau$:
+The four types in $R_L$ describe structural connections between relation nodes, not the original KG's relation labels. A relation-graph edge $(r_1,\tau,r_2)$ exists when triples involving $r_1$ and $r_2$ share an entity in the endpoint configuration specified by $\tau$:
 
 $$
 \begin{aligned}
@@ -89,28 +89,19 @@ $$
 The layer then combines the **current** relation-node representation with the aggregated features:
 
 $$
-\widetilde{\mathbf h}_{r\mid q}^{(\ell+1)}
-=ReLU\!\left(
-LN\!\left(
+\mathbf h_{r\mid q}^{(\ell+1)}
+=ReLU \left(
 W_R^{(\ell)}
 \left[\mathbf h_{r\mid q}^{(\ell)}\parallel\mathbf a_r^{(\ell)}\right]
 +\mathbf b_R^{(\ell)}
-\right)\right),
+\right) + \mathbf h_{r\mid q}^{(\ell)},
 $$
 
-$$
-\mathbf h_{r\mid q}^{(\ell+1)}
-=\mathbf h_{r\mid q}^{(\ell)}+
-\widetilde{\mathbf h}_{r\mid q}^{(\ell+1)}.
-$$
-
-Here, $\parallel$ denotes concatenation and $LN$ denotes LayerNorm. The residual addition is applied when the input and output hidden-state shapes match. In particular, the concatenated node representation is $\mathbf h_{r\mid q}^{(\ell)}$, **not** the initial state $\mathbf h_{r\mid q}^{(0)}$; the initial state instead appears in the aggregated term as a boundary feature.
-
-After $T$ relation message-passing layers, the encoder produces query-conditioned representations $\{\mathbf h_{r\mid q}^{(T)}:r\in R\}$ for all relation types. These representations are computed for the current query relation rather than retrieved from a fixed, graph-specific relation embedding table.
+After $T$ relation message-passing layers, the encoder produces query-conditioned representations $\mathbf h_{r\mid q}^{(T)}$ for all relation types. These representations are computed for the current query relation rather than retrieved from a fixed, graph-specific relation embedding table.
 
 ### 3.2. Query-Conditioned Entity Representation Learning
 
-For a query $(h,q,?)$, the entity encoder uses the relation encoder's final representation of $q$ to initialize the source entity. Other entities have zero initial boundary features:
+For a query $(h,q,?)$, the entity encoder uses the relation encoder's final representation of $q$ to initialize the source entity:
 
 $$
 \mathbf h_{v\mid h,q}^{(0)}=
@@ -125,52 +116,41 @@ For an entity-graph edge $(w,r,v)\in E$, the message from entity $w$ to entity $
 $$
 \mathbf m_{w\to v}^{(\ell)}
 =\mathbf h_{w\mid h,q}^{(\ell)}
-\odot MLP^{(\ell)}\!\left(
+\odot MLP^{(\ell)}\left(
 \mathbf h_{r\mid q}^{(T)}\right).
 $$
 
-The message combines the sender's current representation with a learned projection of the **query-conditioned** representation of the edge's relation type. Aggregation runs over all incoming relation-typed edges and incorporates the initial boundary feature:
+Aggregation runs over all incoming relation-typed edges and incorporates the initial boundary feature:
 
 $$
 \mathbf a_v^{(\ell)}
 =\mathbf h_{v\mid h,q}^{(0)}+
 \sum_{(w,r,v)\in E}
 \mathbf h_{w\mid h,q}^{(\ell)}
-\odot MLP^{(\ell)}\!\left(
+\odot MLP^{(\ell)}\left(
 \mathbf h_{r\mid q}^{(T)}\right).
 $$
 
 The entity-node update is
 
 $$
-\widetilde{\mathbf h}_{v\mid h,q}^{(\ell+1)}
-=ReLU \!\left(
-LN \!\left(
+\mathbf h_{v\mid h,q}^{(\ell+1)}
+=ReLU \left(
 W_E^{(\ell)}
 \left[\mathbf h_{v\mid h,q}^{(\ell)}\parallel\mathbf a_v^{(\ell)}\right]
 +\mathbf b_E^{(\ell)}
-\right)\right),
+\right) + \mathbf h_{v\mid h,q}^{(\ell)},
 $$
-
-$$
-\mathbf h_{v\mid h,q}^{(\ell+1)}
-=\mathbf h_{v\mid h,q}^{(\ell)}+
-\widetilde{\mathbf h}_{v\mid h,q}^{(\ell+1)}.
-$$
-
-As in the relation encoder, the residual addition applies when the hidden-state shapes match. The concatenation uses the current layer's entity representation, while the initial boundary feature enters through aggregation.
 
 After $L$ entity message-passing layers, a candidate tail $t$ is scored using its final entity representation and the **final**, query-conditioned representation of relation $q$:
 
 $$
 s(h,q,t)
-=MLP_{\mathrm{score}}\!\left(
+=MLP_{\mathrm{score}}\left(
 \mathbf h_{t\mid h,q}^{(L)}\parallel
 \mathbf h_{q\mid q}^{(T)}
 \right).
 $$
-
-The scoring MLP outputs a scalar score (logit). Larger scores indicate more plausible candidate triples; they are not necessarily calibrated probabilities.
 
 ## 4. Evaluation Datasets
 
@@ -179,7 +159,7 @@ The notebook evaluates ULTRA on eight inductive KG link-prediction benchmarks co
 - **NELLInductive:** `v1`, `v2`, `v3`, and `v4`, derived from NELL. These benchmarks emphasize generalization to previously unseen entities.
 - **WKIngram:** `25`, `50`, `75`, and `100`, derived from Wikidata and provided in the InGram benchmark format. These benchmarks test generalization to new entities and relation vocabularies.
 
-The notebook loads the pretrained checkpoint `3g_reproduced.pth`, pretrained on **FB15k-237**, **WN18RR**, and **CoDEx-Medium**, and evaluates it without training or fine-tuning on the eight target benchmark datasets. The results therefore measure **zero-shot inductive link-prediction performance**.
+The notebook loads the pretrained checkpoint `3g_reproduced.pth`, pretrained on **FB15k-237**, **WN18RR**, and **CoDEx-Medium**, and evaluates it without training or fine-tuning on the eight target benchmark datasets.
 
 ## 5. Filtered Ranking Evaluation
 
@@ -190,7 +170,7 @@ A query may have more than one correct answer. Under the **filtered** evaluation
 Let $V$ be the candidate entity set and let $E_{\mathrm{filter}}$ contain the known true triples used for filtering. For a tail-prediction query $(h,r,?)$, define the set of known correct tails as
 
 $$
-T^+(h,r)=\{x\in V:(h,r,x)\in E_{\mathrm{filter}}\},
+T^+(h,r)=\lbrace x\in V:(h,r,x)\in E_{\mathrm{filter}} \rbrace,
 $$
 
 and the filtered negative candidate set as
@@ -199,23 +179,23 @@ $$
 T^-(h,r)=V\setminus T^+(h,r).
 $$
 
-For the correct target $t$, the filtered rank is
+For the target $t$, the filtered rank is
 
 $$
 \boxed{
 rank(t)
 =1+\sum_{x\in T^-(h,r)}
-\mathbb I\!\left[s(h,r,x)\ge s(h,r,t)\right]
+\mathbb{1} \left[s(h,r,x)\ge s(h,r,t)\right]
 }
 $$
 
-where $\mathbb I[\cdot]$ is an indicator function. The use of $\ge$ implements **pessimistic tie-breaking**: a remaining negative candidate with the same score as the true target is counted as ranking at least as highly as the target. Known true alternatives that have been filtered out do not affect the rank.
+where $\mathbb{1}[\cdot]$ is an indicator function. Known true alternatives that have been filtered out do not affect the rank.
 
 The filtering graph is used to construct evaluation masks and is distinct from the graph used for neural message passing. In particular, including validation or test target triples in the **filtering graph** does not mean that those triples are provided to the model as message-passing edges. The specific combination of inference, validation, and test triples used for filtering follows the dataset-specific evaluation setup in the notebook.
 
 ## 6. Metrics and Results
 
-Each test triple contributes a head-prediction rank and a tail-prediction rank. If there are $M$ evaluated test triples and both directions are included, the evaluator obtains $N=2M$ ranks. The reported metrics are calculated over these filtered ranks:
+The reported metrics are calculated over these filtered ranks:
 
 $$
 \mathrm{MR}=\frac{1}{N}\sum_{i=1}^{N}rank_i,
@@ -226,11 +206,11 @@ $$
 $$
 \mathrm{Hits@}k
 =\frac{1}{N}\sum_{i=1}^{N}
-\mathbb I\!\left[rank_i\le k\right],
-\qquad k\in\{1,3,10\}.
+\mathbb{1} \left[rank_i\le k\right],
+\qquad k\in \lbrace 1,3,10 \rbrace.
 $$
 
-**Lower** Mean Rank (MR) is better; **higher** Mean Reciprocal Rank (MRR) and Hits@k are better. All results below use **filtered ranking**.
+**Lower** Mean Rank (MR) is better; **higher** Mean Reciprocal Rank (MRR) and Hits@k are better.
 
 | Dataset | MR ↓ | MRR ↑ | Hits@1 ↑ | Hits@3 ↑ | Hits@10 ↑ |
 |---|---:|---:|---:|---:|---:|
