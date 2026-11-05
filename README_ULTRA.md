@@ -254,5 +254,4 @@ $$
 
 ## References
 
-- Galkin, M., Yuan, X., Mostafa, H., Tang, J., and Zhu, Z. **Towards Foundation Models for Knowledge Graph Reasoning.** ICLR 2024. [Paper](https://arxiv.org/abs/2310.04562).
-- [Official ULTRA implementation (PyTorch Geometric)](https://github.com/DeepGraphLearning/ULTRA).
+- Galkin, M., Yuan, X., Mostafa, H., Tang, J., and Zhu, Z. **Towards Foundation Models for Knowledge Graph Reasoning.** ICLR 2024.
