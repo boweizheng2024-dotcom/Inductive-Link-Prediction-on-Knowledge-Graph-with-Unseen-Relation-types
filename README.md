@@ -159,7 +159,8 @@ The notebook evaluates ULTRA on eight inductive KG link-prediction benchmarks co
 - **NELLInductive:** `v1`, `v2`, `v3`, and `v4`, derived from NELL. These benchmarks emphasize generalization to previously unseen entities.
 - **WKIngram:** `25`, `50`, `75`, and `100`, derived from Wikidata and provided in the InGram benchmark format. These benchmarks test generalization to new entities and relation vocabularies.
 
-The notebook loads the pretrained checkpoint `3g_reproduced.pth`, pretrained on **FB15k-237**, **WN18RR**, and **CoDEx-Medium**, and evaluates it without training or fine-tuning on the eight target benchmark datasets.
+The notebook loads the pretrained checkpoint `3g_reproduced.pth` included in this repository. The checkpoint was pretrained on FB15k-237, WN18RR, and CoDEx-Medium. The model is evaluated on the eight target benchmark datasets without training or fine-tuning on them.
+
 
 ## 5. Filtered Ranking Evaluation
 
